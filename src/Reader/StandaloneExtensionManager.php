@@ -25,6 +25,8 @@ class StandaloneExtensionManager implements ExtensionManagerInterface
         'Syndication\Feed'      => 'Zend\Feed\Reader\Extension\Syndication\Feed',
         'Thread\Entry'          => 'Zend\Feed\Reader\Extension\Thread\Entry',
         'WellFormedWeb\Entry'   => 'Zend\Feed\Reader\Extension\WellFormedWeb\Entry',
+        'WrongRss\Entry'        => 'Zend\Feed\Reader\Extension\WrongRss\Entry',
+        'ExternalContent\Entry' => 'Zend\Feed\Reader\Extension\ExternalContent\Entry',
     ];
 
     /**

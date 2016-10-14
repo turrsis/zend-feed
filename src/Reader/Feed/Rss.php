@@ -584,6 +584,10 @@ class Rss extends AbstractFeed
         }
 
         if (!$title) {
+            $title = $this->getExtension('WrongRss')->getTitle();
+        }
+
+        if (!$title) {
             $title = null;
         }
 
@@ -667,7 +671,17 @@ class Rss extends AbstractFeed
         } else {
             $entries = $this->xpath->evaluate('//rss:item');
         }
-
+        if (!$entries->length) {
+            $rss = $this->domDocument->getElementsByTagName('rss');
+            if (!$rss->length) {
+                return;
+            }
+            $channel = $rss->item(0)->getElementsByTagName('channel');
+            if (!$channel->length) {
+                return;
+            }
+            $entries = $channel->item(0)->getElementsByTagName('item');
+        }
         foreach ($entries as $index => $entry) {
             $this->entries[$index] = $entry;
         }

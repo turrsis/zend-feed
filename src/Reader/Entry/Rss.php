@@ -48,10 +48,12 @@ class Rss extends AbstractEntry implements EntryInterface
         $extensions = [
             'DublinCore\Entry',
             'Content\Entry',
+            'ExternalContent\Entry',
             'Atom\Entry',
             'WellFormedWeb\Entry',
             'Slash\Entry',
             'Thread\Entry',
+            'WrongRss\Entry',
         ];
         foreach ($extensions as $name) {
             $extension = $manager->get($name);
@@ -152,6 +154,13 @@ class Rss extends AbstractEntry implements EntryInterface
         $content = $this->getExtension('Content')->getContent();
 
         if (!$content) {
+            $content = $this->getExtension('WrongRss')->getContent($this);
+        }
+        if (!$content) {
+            $content = $this->getExtension('ExternalContent')->getContent($this);
+        }
+
+        if (!$content) {
             $content = $this->getDescription();
         }
 
@@ -227,6 +236,10 @@ class Rss extends AbstractEntry implements EntryInterface
         }
 
         if (!$date) {
+            $date = $this->getExtension('WrongRss')->getDateModified();
+        }
+
+        if (!$date) {
             $date = null;
         }
 
@@ -264,6 +277,11 @@ class Rss extends AbstractEntry implements EntryInterface
             $description = $this->getExtension('Atom')->getDescription();
         }
 
+        if (!$description) {
+            $description = $this->getExtension('WrongRss')->getDescription();
+        }
+        
+        
         if (!$description) {
             $description = null;
         }
@@ -393,7 +411,12 @@ class Rss extends AbstractEntry implements EntryInterface
                 $links[] = $link->nodeValue;
             }
         }
-
+        if (empty($links)) {
+            $links = $this->getExtension('WrongRss')->getLinks();
+        }
+        array_walk($links, function (&$link, $key) {
+            $link = trim($link);
+        });
         $this->data['links'] = $links;
 
         return $this->data['links'];
@@ -476,6 +499,10 @@ class Rss extends AbstractEntry implements EntryInterface
 
         if (!$title) {
             $title = $this->getExtension('Atom')->getTitle();
+        }
+
+        if (!$title) {
+            $title = $this->getExtension('WrongRss')->getTitle();
         }
 
         if (!$title) {

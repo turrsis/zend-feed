@@ -121,10 +121,6 @@ class Entry extends Extension\AbstractEntry
             }
         }
 
-        if (!$content) {
-            $content = $this->getDescription();
-        }
-
         $this->data['content'] = trim($content);
 
         return $this->data['content'];

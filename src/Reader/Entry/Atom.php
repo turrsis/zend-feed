@@ -37,7 +37,7 @@ class Atom extends AbstractEntry implements EntryInterface
         $this->xpathQuery = '//atom:entry[' . ($this->entryKey + 1) . ']';
 
         $manager    = Reader\Reader::getExtensionManager();
-        $extensions = ['Atom\Entry', 'Thread\Entry', 'DublinCore\Entry'];
+        $extensions = ['Atom\Entry', 'Thread\Entry', 'DublinCore\Entry', 'ExternalContent\Entry',];
 
         foreach ($extensions as $name) {
             $extension = $manager->get($name);
@@ -95,6 +95,10 @@ class Atom extends AbstractEntry implements EntryInterface
         }
 
         $content = $this->getExtension('Atom')->getContent();
+
+        if (!$content) {
+            $content = $this->getExtension('ExternalContent')->getContent($this);
+        }
 
         $this->data['content'] = $content;
 
@@ -223,6 +227,9 @@ class Atom extends AbstractEntry implements EntryInterface
 
         $links = $this->getExtension('Atom')->getLinks();
 
+        array_walk($links, function (&$link, $key) {
+            $link = trim($link);
+        });
         $this->data['links'] = $links;
 
         return $this->data['links'];

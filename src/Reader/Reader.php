@@ -310,7 +310,7 @@ class Reader implements ReaderImportInterface
         if (!is_string($string) || empty($trimmed)) {
             throw new Exception\InvalidArgumentException('Only non empty strings are allowed as input');
         }
-
+        $string = self::normalizeXmlString($string);
         $libxmlErrflag = libxml_use_internal_errors(true);
         $oldValue = libxml_disable_entity_loader(true);
         $dom = new DOMDocument;
@@ -352,6 +352,18 @@ class Reader implements ReaderImportInterface
             . 'valid Atom, RSS or RDF feed that Zend\Feed\Reader can parse.');
         }
         return $reader;
+    }
+
+    protected static function normalizeXmlString($string)
+    {
+        $string = trim($string);
+        /*if ('<' . '?xml' == substr($string, 0, 5)) {
+            $ct = stripos($string, '>', 5);
+            $string = substr($string, $ct + 1);
+        }*/
+        $string = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $string);
+        //$string = html_entity_decode($string);
+        return $string;
     }
 
     /**
@@ -486,6 +498,27 @@ class Reader implements ReaderImportInterface
             }
 
             return $type;
+        } else {
+            $type = self::TYPE_RSS_ANY;
+            $version = $dom->getElementsByTagName('rss');
+            if ($version->length == 1) {
+                $version = $version->item(0);
+                $version = $version->getAttribute('version');
+                if (strlen($version) > 0) {
+                    switch ($version) {
+                        case '2.0':
+                            return self::TYPE_RSS_20;
+                        case '0.94':
+                            return self::TYPE_RSS_094;
+                        case '0.93':
+                            return self::TYPE_RSS_093;
+                        case '0.92':
+                            return self::TYPE_RSS_092;
+                        case '0.91':
+                            return self::TYPE_RSS_091;
+                    }
+                }
+            }
         }
 
         $xpath->registerNamespace('rdf', self::NAMESPACE_RDF);
